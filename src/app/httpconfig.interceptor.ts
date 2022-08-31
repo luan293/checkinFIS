@@ -34,7 +34,7 @@ export class HttpConfigInterceptor implements HttpInterceptor {
     request = request.clone({ headers: request.headers.set('Access-Control-Allow-Origin', '*') });
         console.log('HttpConfigInterceptor', request);
         return next.handle(request).pipe(
-            timeout(15000),
+            timeout(30000),
             map((event: HttpEvent<any>) => {
                 if (event instanceof HttpResponse) {
                     console.log('event--->>>', event);

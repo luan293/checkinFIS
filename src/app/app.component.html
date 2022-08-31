@@ -1,20 +1,21 @@
 <div>{{status}}</div>
 <p>{{dayStatus?.data.fullName}} - In: {{dayStatus?.data.checkinTime}} / Out: {{dayStatus?.data.checkoutTime}}</p>
-<input [(ngModel)]="reason"/>
-<div *ngFor="let item of data">
-  <div style="display: inline-flex">
-    <button (click)="checkIn(item)">
-      CheckIn
-    </button>
-    <button (click)="checkOut(item)">
-      CheckOut
-    </button>
-    <div>{{item.name}}</div>
-    <button (click)="checkStatus(item)">
-      check Status
-    </button>
-    <!--<button *ngIf="item.data.userid == 14349" (click)="sendMed()">
-      gui y te
-    </button>-->
-  </div>
-</div>
+<p>user</p>
+<input placeholder="pass" [(ngModel)]="user"/>
+<p>pass</p>
+<input placeholder="user" [(ngModel)]="pass"/>
+
+
+
+<button (click)="login()">
+  login
+</button>
+<button (click)="checkIn()">
+  CheckIn
+</button>
+<button (click)="checkOut()">
+  CheckOut
+</button>
+<button (click)="checkStatus()">
+  check Status
+</button>

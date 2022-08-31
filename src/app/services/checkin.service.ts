@@ -3,18 +3,19 @@ import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { CheckInOut, TimeCheckInOut, DataBase, DayStatus } from '../models/checkin.model';
+import { CheckInOut, TimeCheckInOut, DataBase, DayStatus, LoginRequest, LoginResponse, InfoUser, DataParamHeader } from '../models/checkin.model';
 
 export const enum ApiUrl {
-  HOST = 'https://api.fis.vn:9999',
+  HOST = 'https://ddc.fis.vn',
+  LOGIN = '/fis0/api/login',
 
-  GET_TIME_CHECKIN = '/fis/api/checkin',
-  GET_TIME_CHECKOUT = '/fis/api/checkout',
-  CHECK_IN_ALL = '/fis/api/checkin_all',
-  CHECK_OUT_ALL = '/fis/api/checkout_all',
+  // GET_TIME_CHECKIN = '/fis0/api/checkin',
+  // GET_TIME_CHECKOUT = '/fis0/api/checkout',
+  CHECK_IN_ALL = '/fis0/api/checkin_all',
+  CHECK_OUT_ALL = '/fis0/api/checkout_all',
   PUT_CHECKIN_OUT = '/apietms/api/ChechInData/MobileAddCheckInOut',
-  CHECK_STATUS = '/fis/api/get_day_status',
-  CHECK_MED = '/fis/api/send_medical_form'
+  CHECK_STATUS = '/fis0/api/get_day_status',
+  CHECK_MED = '/fis0/api/send_medical_form'
 }
 
 @Injectable()
@@ -36,31 +37,36 @@ export class CheckinService {
   //  return this.httpClient.get<TimeCheckInOut>(`${ApiUrl.HOST}${ApiUrl.GET_TIME_CHECKOUT}`, { headers: headers });
   //}
 
-  CheckInAll(data: DataBase): Observable<TimeCheckInOut> {
+  CheckInAll(data: DataParamHeader, infoUser: InfoUser): Observable<TimeCheckInOut> {
     let headers = new HttpHeaders().set('Content-Type', 'application/json');
-    headers = headers.append('User-Agent', data.data.UserAgent);
-     headers = headers.append('Authorization', `${data.data.Authorization_2}`);
+    headers = headers.append('User-Agent', data.UserAgent);
+     headers = headers.append('Authorization', `Bearer ${infoUser.token}`);
+     headers = headers.append('If-None-Match', data.IfNoneMatch);
+
     return this.httpClient.post<TimeCheckInOut>(`${ApiUrl.HOST}${ApiUrl.CHECK_IN_ALL}`,
-      { deviceid: data.data.deviceid, ipGateway: data.data.ipGateway, reason: data.data.reason, type: 0 },
+      { deviceid: data.deviceid, ipGateway: data.ipGateway, type: 0 },
       { headers: headers });
   }
 
-  CheckOutAll(data: DataBase): Observable<TimeCheckInOut> {
+  CheckOutAll(data: DataParamHeader, infoUser: InfoUser): Observable<TimeCheckInOut> {
     let headers = new HttpHeaders().set('Content-Type', 'application/json');
-    headers = headers.append('User-Agent', data.data.UserAgent);
-    headers = headers.append('Authorization', `${data.data.Authorization_2}`);
+    headers = headers.append('User-Agent', data.UserAgent);
+    headers = headers.append('Authorization', `Bearer ${infoUser.token}`);
+    headers = headers.append('If-None-Match', data.IfNoneMatch);
     return this.httpClient.post<TimeCheckInOut>(`${ApiUrl.HOST}${ApiUrl.CHECK_OUT_ALL}`,
-      { deviceid: data.data.deviceid, ipGateway: data.data.ipGateway, reason: data.data.reason, type: 0 }, { headers: headers } );
+      { deviceid: data.deviceid, ipGateway: data.ipGateway, type: 0 }, { headers: headers } );
   }
 
-  CheckInOut(data: DataBase): Observable<CheckInOut> {
+  CheckInOut(data: DataParamHeader, infoUser: InfoUser): Observable<CheckInOut> {
     let headers = new HttpHeaders().set('Content-Type', 'application/json');
-    headers = headers.append('User-Agent', data.data.UserAgent);
-    headers = headers.append('Authorization', `${data.data.Authorization_1}`);
+    headers = headers.append('User-Agent', data.UserAgent);
+    headers = headers.append('Authorization', `Bearer ${infoUser.token}`);
+
+    console.log(infoUser.token);
    // let params = new HttpParams().set('userId', data.data.userid.toString());
     //params = params.append('typeCheckInOut', data.data.type.toString());
     //params = params.append('dateCheckInOut', data.data.dateCheckInOut.toString());
-    return this.httpClient.post<CheckInOut>(`${ApiUrl.HOST}${ApiUrl.PUT_CHECKIN_OUT}?userId=${data.data.userid}&typeCheckInOut=${data.data.type}&dateCheckInOut=${data.data.dateCheckInOut}`,
+    return this.httpClient.post<CheckInOut>(`${ApiUrl.HOST}${ApiUrl.PUT_CHECKIN_OUT}?userId=${infoUser.userId}&typeCheckInOut=${data.type}&dateCheckInOut=${data.dateCheckInOut}`,
       {}, { headers: headers });
   }
 
@@ -68,7 +74,7 @@ export class CheckinService {
     let headers = new HttpHeaders().set('Content-Type', 'application/json');
     headers = headers.append('If-None-Match', data.data.IfNoneMatch);
     headers = headers.append('User-Agent', data.data.UserAgent);
-    headers = headers.append('Authorization', `${data.data.Authorization_2}`);
+    headers = headers.append('Authorization', `Bearer ${data.data.Authorization_2}`);
 
     // headers = headers.append('ssid', '');
 
@@ -81,4 +87,12 @@ export class CheckinService {
   //  console.log(headers)
   //  return this.httpClient.post<any>(`${ApiUrl.HOST}${ApiUrl.CHECK_MED}`, data, { headers: headers });
   //}
+
+  login(data: DataParamHeader, bodyRq: LoginRequest): Observable<LoginResponse> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/json');
+    headers = headers.append('User-Agent', data.UserAgent);
+    headers = headers.append('If-None-Match', data.IfNoneMatch);
+    return this.httpClient.post<LoginResponse>(`${ApiUrl.HOST}${ApiUrl.LOGIN}`,
+    bodyRq, { headers: headers } );
+  }
 }

@@ -23,7 +23,7 @@ export interface DataBase {
   data: DataParamHeader;
 }
 
-export interface DataParamHeader {
+export class DataParamHeader {
   userid: number;
   deviceid: string;
   ipGateway: string;
@@ -34,6 +34,7 @@ export interface DataParamHeader {
   IfNoneMatch: string;
   type: number;
   reason: string;
+  
 }
 
 export interface TimeStatus extends CheckBase {
@@ -89,3 +90,43 @@ export interface AttendanceWFH {
   checkout: Checkout;
 }
 
+
+
+
+export class LoginRequest{
+  username: String;
+  password:String;
+  buildNumber:String;
+  version:String;
+  deviceIP:String;
+  deviceModel:String;
+  osVersion:String;
+
+
+}
+
+
+
+export interface LoginResponse extends CheckBase {
+  data:InfoUser;
+
+}
+
+export interface InfoUser {
+  token: String;
+  userId:String;
+  employeeId:String;
+  username:String;
+  fullName:String;
+  email:String;
+  avatarUrl:String;
+  deviceStatus: number;
+  medicalStatus:boolean;
+  formTitle:String;
+  adminRole:String;
+  covid_fpt:boolean;
+  olympic:boolean;
+  iPaper:boolean;
+  stayInterview:boolean;
+  etmsId:number;
+}

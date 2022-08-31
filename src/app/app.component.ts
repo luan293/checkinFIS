@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CheckinService } from './services/checkin.service';
-import { DataBase, DayStatus } from './models/checkin.model';
+import { DataBase, DataParamHeader, DayStatus, InfoUser, LoginRequest } from './models/checkin.model';
+
 import * as moment from 'moment-timezone'
 @Component({
   selector: 'app-root',
@@ -8,73 +9,28 @@ import * as moment from 'moment-timezone'
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  
   title = 'checkin';
   data = new Array<DataBase>();
+  requestLogin = new LoginRequest();
   status: string;
   dayStatus: DayStatus;
-  reason: string;
+  pass: string;
+  user: string;
+  baseData = new DataParamHeader();
+
+  loginData: InfoUser;
   constructor(public checkInService: CheckinService) {
-    this.data.push(
-      {
-        id: 1,
-        name: 'Luan dep trai',
+ 
+    this.baseData.deviceid = 'D545B663-D69D-4654-B53A-A8264EC41E96';
+    this.baseData.ipGateway='10.86.156.1',//'10.86.161.49',//'10.86.156.1';
+    this.baseData.UserAgent='FIS/10937 CFNetwork/1335.0.3 Darwin/21.6.0'; //FIS/10929 CFNetwork/1335.0.3 Darwin/21.6.0
+    this.baseData.IfNoneMatch= `W/"229-QwF4wWUsartlJ3/X6lkYDT7XI2A"`;//W/"7c9-gMazYjggsFAEURAFieej1LjcLCQ"
+    this.baseData.type= 0;
+    
+    this.user = localStorage.getItem('user');
+    this.pass = localStorage.getItem('pass');
 
-        data: {
-          userid: 14349,
-          deviceid: '21C22927-1412-4537-B372-58F205BBCD0E',
-          ipGateway: '10.86.156.1',
-          UserAgent: 'FIS/10770 CFNetwork/1220.1 Darwin/20.3.0',
-          Authorization_1: `Basic c3NkX2FwaTpzc2RAMjAxNw==`,
-          Authorization_2: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlNmY0OTY5YjU4ZGU5MTRjMDIzY2IyMiIsImlhdCI6MTYyMTMwNjMxNX0.qr-XlTUPfa6DeMSpY5Bm1sdq8kO1IRK45syxwJKL4CM`,
-          dateCheckInOut: null,
-          IfNoneMatch: `W/"1ca-ABl975jXr4Zg4E5JBWoL+4F5xRM"`,
-          type: 0,
-          reason: "di lam"
-        }
-      }
-    );
-
-    this.data.push(
-      {
-        id: 3,
-        name: 'Chien',
-
-        data: {
-          userid: 14350,
-          deviceid: '022BCBB7-67A7-431F-A05F-A86918AC26CE',
-          ipGateway: '10.86.156.1',
-          UserAgent: 'FIS/9233 CFNetwork/1120 Darwin/19.0.0',
-          Authorization_1: `Basic c3NkX2FwaTpzc2RAMjAxNw==`,
-          Authorization_2: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlNTYyMjJlODM1ZmNjMGZlOGM3NGFkOSIsImlhdCI6MTU5MTA4MDQwM30.AvXmLKoi9Il4BQt-IymMd4RKwYg8K7ZB4PACQyRJAbM`,
-          dateCheckInOut: null,
-          IfNoneMatch: `W/"62-0sIyQmLIjbCpRfFaDL3UCPPLYgI"`,
-          reason: this.reason ,
-
-          type: 0       // 1 checkin, 2 checkout
-        }
-      }
-    )
-
-    this.data.push(
-      {
-        id: 4,
-        name: 'CuongLT',
-
-        data: {
-          userid: 14088,
-          deviceid: 'B92107E5-5D57-4532-A9D6-6C23365ED321',
-          ipGateway: '10.86.156.1',
-          UserAgent: 'FIS/9233 CFNetwork/1125.2 Darwin/19.0.0',
-          Authorization_1: `Basic c3NkX2FwaTpzc2RAMjAxNw==`,
-          Authorization_2: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlNmVlODU0ZTc5ZTk5MTkzMDBjZmNiMyIsImlhdCI6MTU5MTMyOTc2MH0.dOsOLGE2RGHXUZ-JGH1t4K0qaLC2NUEN23htLNn9dQ4`,
-          dateCheckInOut: null,
-          IfNoneMatch: `W/'72-oPOhWteqrXlvY4MdXV5iq+e6P1k'`,
-          reason: this.reason,
-
-          type: 0      // 1 checkin, 2 checkout
-        }
-      }
-    );
   }
 
 
@@ -106,10 +62,22 @@ export class AppComponent {
     //  }
     //},5000)
   }
-  sendMel() {
-    //this.checkInService.CheckMed(this.meForm).subscribe(val => {
-    //  this.status = val.message
-    //})
+  login() {
+    this.requestLogin.buildNumber = '10937';
+    this.requestLogin.version = '1.78';
+    this.requestLogin.deviceModel = "unknown";
+    this.requestLogin.osVersion = "15.6.1";
+    this.requestLogin.deviceIP = "10.86.156.1";//192.168.1.4,10.86.156.1
+    this.requestLogin.username = this.user;
+    this.requestLogin.password = this.pass;
+    localStorage.setItem('user', this.user);
+    localStorage.setItem('pass', this.pass);
+
+    this.checkInService.login(this.baseData, this.requestLogin ).subscribe(val => {
+     this.status = val.message;
+     this.loginData = val.data;
+     console.log(this.loginData.token);
+    })
   }
   setTimeout_(fn, delay) {
     var maxDelay = Math.pow(2, 31) - 1;
@@ -125,22 +93,22 @@ export class AppComponent {
 
     return setTimeout.apply(undefined, arguments);
   }
-  checkIn(item: DataBase) {
+  checkIn() {
     this.status = ''
-    item.data.reason = this.reason;
-    this.checkInService.CheckInAll(item).subscribe(val => {
+   // item.data.reason = this.reason;
+    this.checkInService.CheckInAll(this.baseData, this.loginData).subscribe(val => {
       this.status = val.message
 
       if (val.resultCode == 1) {
-        item.data.type = 1;
-        item.data.dateCheckInOut = moment(val.data.checkinTime).utc().format('DD-MM-YYYY hh:mm:ss');
-        this.status = ''
-        this.checkInService.CheckInOut(item).subscribe(rs => {
-          this.status = JSON.stringify(val)//.message
-          if (rs.resultCode == 1) {
-            this.status += val.data.checkinTime;
-          }
-        });
+        this.baseData.type = 1;
+        this.baseData.dateCheckInOut = moment(val.data.checkinTime).utc().format('DD-MM-YYYY hh:mm:ss');
+        this.status = val.data.checkinTime.toString();
+        // this.checkInService.CheckInOut(this.baseData,this.loginData).subscribe(rs => {
+        //   this.status = JSON.stringify(val)//.message
+        //   if (rs.resultCode == 1) {
+        //     this.status += val.data.checkinTime;
+        //   }
+        // });
       }
     })
   }
@@ -154,21 +122,21 @@ export class AppComponent {
   //  }
   //}
 
-  checkOut(item: DataBase) {
+  checkOut() {
     this.status = ''
-    this.checkInService.CheckOutAll(item).subscribe(val => {
+    this.checkInService.CheckOutAll(this.baseData, this.loginData).subscribe(val => {
       this.status = val.message
       if (val.resultCode == 1) {
-        item.data.type = 2;
-        item.data.dateCheckInOut = moment(val.data.checkinTime).utc().format('DD-MM-YYYY hh:mm:ss');
-        console.log(item.data.dateCheckInOut)
-        this.status = ''
-        this.checkInService.CheckInOut(item).subscribe(rs => {
-          this.status = JSON.stringify(val)
-          if (rs.resultCode == 1) {
-            this.status += val.data.checkoutTime;
-          }
-        })
+        this.baseData.type = 2;
+        this.baseData.dateCheckInOut = moment(val.data.checkinTime).utc().format('DD-MM-YYYY hh:mm:ss');
+        console.log(this.baseData.dateCheckInOut)
+     //   this.status = val.data.checkoutTime.toString();
+        // this.checkInService.CheckInOut(this.baseData, this.loginData).subscribe(rs => {
+        //   this.status = JSON.stringify(val)
+        //   if (rs.resultCode == 1) {
+        //     this.status += val.data.checkoutTime;
+        //   }
+        // })
       }
     })
   }
@@ -186,3 +154,7 @@ export class AppComponent {
     })
   }
 }
+
+
+//token login: 
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwYTIzNjhjNGM0YjgzMGY4YTZkM2ZkYSIsImlhdCI6MTY2MDgxMjk3MSwiZXhwIjoxNjYxMDcyMTcxfQ.JDmyF-vCattVJkjIxkIvuXIen3XjryWEdGU9byG0fi4
